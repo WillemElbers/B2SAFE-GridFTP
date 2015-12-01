@@ -17,8 +17,8 @@ Full installation instructions are available here: `http://toolkit.globus.org/to
 Download and install the package repo for your system:
 
 ```
-wget http://toolkit.globus.org/ftppub/gt6/installers/repo/globus-toolkit-repo-latest.noarch.rpm
-rpm -hUv globus-toolkit-repo-latest.noarch.rpm
+wget http://toolkit.globus.org/ftppub/gt6/installers/repo/globus-toolkit-repo-latest.noarch.rpm && \
+rpm -hUv globus-toolkit-repo-latest.noarch.rpm && \
 yum install globus-data-management-client
 ```
 
@@ -26,8 +26,8 @@ yum install globus-data-management-client
 Download and install the package repo for your system:
 
 ```
-wget http://toolkit.globus.org/ftppub/gt6/installers/repo/globus-toolkit-repo_latest_all.deb
-dpkg -i globus-toolkit-repo_latest_all.deb
+wget http://toolkit.globus.org/ftppub/gt6/installers/repo/globus-toolkit-repo_latest_all.deb && \
+dpkg -i globus-toolkit-repo_latest_all.deb && \
 apt-get update && apt-get install -y globus-data-management-client
 ```
  
@@ -36,13 +36,15 @@ apt-get update && apt-get install -y globus-data-management-client
 * Obtain your user certificate and private key from the remote server `alice` and place it in `~/.globus/`:
 
 ```
-mkdir ~/.globus
+mkdir ~/.globus && \
 scp alice@145.100.59.149:~/users/gridftp<xyz>/user* ~/.globus/
 ```
 
 * Install the certificate for the CA that signed the user certificate (only needed for untrusted CA's):
 
 ```
+mkdir /etc/grid-security/certificates && \
+scp alice@145.100.59.149:~/users/ca/dd5d9bb8* /etc/grid-security/certificates/
 ```
 
 * Initialize the proxy
@@ -53,17 +55,84 @@ The first time you can run the following command to get detailed information abo
 grid-proxy-init -verify -debug
 ```
 
-Normally the following suffices to initialize a new proxy certificate:
+Normally you don't need to initialize the proxy with the `-verify` and `-debug` options. Thus the following suffices to initialize a new proxy certificate:
 
 ```
 grid-proxy-init
 ```
+
+Finally you have to supply the password for the user certificate and then the proxy certificate is generated. The final output will tell you when the proxy certificate will expire. By default the proxy certificate has a validity of 12 hours.
+
+#### Additional information
+
+The `grid-proxy-init -verify -debug` command will show some information about your user certificate and CA that signed the user certificate.
+
+This is the user certificate and key file you just copied from the remote `alice` machine:
+
+```
+User Cert File: /root/.globus/usercert.pem
+User Key File: /root/.globus/userkey.pem
+```
+
+The CA certificate and signing policy used to sign the user certificate is loaded from this directory:
+
+```
+Trusted CA Cert Dir: /etc/grid-security/certificates
+```
+
+Your proxy certificate is placed in this file:
+
+```
+Output File: /tmp/x509up_u0
+```
+
+The identity you will be using, based on the user certificate:
+
+```
+Your identity: /O=Grid/OU=GlobusTest/OU=simpleCA-irods4.alice/OU=local/CN=GridFTP-001
+```
+
+#### Issues
+
+##### Issue 1
+```
+Error: Couldn't verify the authenticity of the user's credential to generate a proxy from.
+       grid_proxy_init.c:956: globus_credential: Error verifying credential: Failed to verify credential
+globus_gsi_callback_module: Could not verify credential
+globus_gsi_callback_module: Could not verify credential
+globus_gsi_callback_module: Error with signing policy
+globus_gsi_callback_module: Error with signing policy
+globus_sysconfig: Error getting signing policy file
+globus_sysconfig: File does not exist: /etc/grid-security/certificates/dd5d9bb8.signing_policy is not a valid file
+```
+
+This error means the CA signing policy file for the user certificate is not in the expected location. Fetch the CA signing policy file from the remote `alice` server an place it in `/etc/grid-security/certificates`.
+
+##### Issue 2
+
+```
+Error: Couldn't verify the authenticity of the user's credential to generate a proxy from.
+       grid_proxy_init.c:956: globus_credential: Error verifying credential: Failed to verify credential
+globus_gsi_callback_module: Could not verify credential
+globus_gsi_callback_module: Can't get the local trusted CA certificate: Cannot find trusted CA certificate with hash dd5d9bb8 in /etc/grid-security/certificates
+```
+
+This error means the CA certificate is not in the expected location. Fetch the CA certificate from the remote `alice` server and place it in `/etc/grid-security/certificates`.
+
+#### Host
+
+```
+echo "145.100.59.149 irods4.alice" >> /etc/hosts
+```
+
 
 ## 2: Communicate with GridFTP server
 
 Time: 10 minutes
 
 ### 2.1: Globus-url-copy
+
+Usage of the `globus-url-copy` command:
 
 ```
 # globus-url-copy -help
@@ -78,7 +147,12 @@ Any url specifying a directory must end with a forward slash '/'
 If <sourceURL> is a directory, all files within that directory will
 be copied.
 <destURL> must be a directory if multiple files are being copied.
+...
+```
 
+Some useful arguments:
+
+```
 Note:  If the ftp server from the source url does not support the MLSD
        command, this client will attempt to transfer subdirectories as
        files, resulting in an error.  Recursion is not possible in this
@@ -141,6 +215,10 @@ OPTIONS
 ```
 
 ### 2.1: Listing
+
+```
+globus-url-copy -list gsiftp://irods4.alice/aliceZone/home/alice
+```
 
 ### 2.2: Uploading and Downloading files
 
