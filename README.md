@@ -267,6 +267,6 @@ export LD_PRELOAD
 ## References
 
 1. http://www.irods.org
-2. http://toolkit.globus.org/toolkit/docs/6.0/admin/install/#gtadmin
+2. http://toolkit.globus.org/toolkit/docs/6.0/admin/install
 3. https://github.com/EUDAT-B2STAGE/B2STAGE-GridFTP
-4. http://toolkit.globus.org/toolkit/docs/6.0/simpleca/admin/#idp32481920
+4. http://toolkit.globus.org/toolkit/docs/6.0/simpleca/admin
