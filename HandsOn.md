@@ -63,6 +63,19 @@ grid-proxy-init
 
 Finally you have to supply the password for the user certificate and then the proxy certificate is generated. The final output will tell you when the proxy certificate will expire. By default the proxy certificate has a validity of 12 hours.
 
+You can use the `grid-proxy-info` command to get information about the current proxy:
+
+```
+$ grid-proxy-info
+subject  : /O=Grid/OU=GlobusTest/OU=simpleCA-irods4.alice/OU=local/CN=GridFTP-001/CN=1963993271
+issuer   : /O=Grid/OU=GlobusTest/OU=simpleCA-irods4.alice/OU=local/CN=GridFTP-001
+identity : /O=Grid/OU=GlobusTest/OU=simpleCA-irods4.alice/OU=local/CN=GridFTP-001
+type     : RFC 3820 compliant impersonation proxy
+strength : 1024 bits
+path     : /tmp/x509up_u1001
+timeleft : 8:22:56
+```
+
 #### Additional information
 
 The `grid-proxy-init -verify -debug` command will show some information about your user certificate and CA that signed the user certificate.
@@ -119,10 +132,13 @@ globus_gsi_callback_module: Can't get the local trusted CA certificate: Cannot f
 
 This error means the CA certificate is not in the expected location. Fetch the CA certificate from the remote `alice` server and place it in `/etc/grid-security/certificates`.
 
-#### Host
+### 1.3 Host file configuration
+
+In order to access the alica and bob machines via there hostnames `irods4.alice` and `irods4.bob` we have to add the following entries to the `/etc/hosts` file:
 
 ```
-echo "145.100.59.149 irods4.alice" >> /etc/hosts
+echo "145.100.59.149 irods4.alice" >> /etc/hosts && \
+echo "irods4.bob" >> /etc/hosts
 ```
 
 
@@ -153,30 +169,12 @@ be copied.
 Some useful arguments:
 
 ```
-Note:  If the ftp server from the source url does not support the MLSD
-       command, this client will attempt to transfer subdirectories as
-       files, resulting in an error.  Recursion is not possible in this
-       case, but you can use the -c (continue on errors) option in order
-       to transfer the regular files from the top level directory.
-       **GridFTP servers prior to version 1.17 (Globus Toolkit 3.2)
-         do not support MLSD.
-
-OPTIONS
   -help | -usage
        Print help
   -version
        Print the version of this program
   -versions
        Print the versions of all modules that this program uses
-  ...
-  -cd | -create-dest
-       Create destination directory if needed
-  -r | -recurse
-       Copy files in subdirectories
-  -fast
-       Recommended when using GridFTP servers. Use MODE E for all data
-       transfers, including reusing data channels between list and transfer
-       operations.
   -q | -quiet
        Suppress all output for successful operation
   -v | -verbose
@@ -187,18 +185,14 @@ OPTIONS
   -dbg | -debugftp
        Debug ftp connections.  Prints control channel communication
        to stderr
-  ...
-  -rp | -relative-paths
-      The path portion of ftp urls will be interpreted as relative to the
-      user's starting directory on the server.  By default, all paths are
-      root-relative.  When this flag is set, the path portion of the ftp url
-      must start with %%2F if it designates a root-relative path.
-  ...
-  -list <url to list>
-  ...
+```
+
+```
   -concurrency | -cc
       Number of concurrent ftp connections to use for multiple transfers.
-  ...
+```
+
+```
   -sync
        Only transfer files where the destination does not exist or differs
        from the source.  -sync-level controls how to determine if files
@@ -216,11 +210,51 @@ OPTIONS
 
 ### 2.1: Listing
 
+Listing an iRODS collection in the remote server by using the `-list` argument.
+
 ```
-globus-url-copy -list gsiftp://irods4.alice/aliceZone/home/alice
+  -list <url to list>
 ```
 
+Example:
+
+```
+globus-url-copy -list gsiftp://irods4.alice/aliceZone/home/alice/
+```
+Note: don't forget the trailing slash (/).
+
+The url to list consists of `/<zone_name>/<collection>/<collection>/...`.
+
+If you want more output on what is happening use the `-dbg -v` arguments.
+
 ### 2.2: Uploading and Downloading files
+
+#### Single files
+
+Transfer a single file to the remote iRODS server:
+
+```
+globus-url-copy -vb single_file.txt gsiftp://irods4.alice/aliceZone/home/alice/
+```
+
+#### Directories
+
+Tranfer a directory to the remote iRODS server:
+
+```
+globus-url-copy -vb dataset1/ gsiftp://irods4.alice/aliceZone/home/alice/dataset1/
+```
+
+This command will fail with the following message because the destination directory doesn't exist:
+
+```
+500 500-Command failed. : iRODS DSI. Error: rcDataObjCreate failed. SYS_INTERNAL_NULL_INPUT_ERR: , status: -24000.
+```
+
+Questions:
+
+* Improve the command in such a way that the destination directory is properly created.
+* Improve the command in such a way that all subdirectories are included as well. 
 
 ## 3 Data synchronization
 
@@ -228,4 +262,28 @@ Time: 30 minutes
 
 ### 3.1 Client data transfer script
 
+Our goal is to develop a script that will synchronize a directory tree from the client to the server and when run multiple times it should take into account changed and delete files. You should also consider expiration for the proxy certificate and renew it when needed.
+
+### 3.2 Improved client data transfer script
+
+Upon ingestion of data in B2SAFE PIDs are assigned, how could you obtain the PIDs for data you ingest with the data transfer script?
+
 ### 3.2 Server policies
+
+Configure the alice iRODS server in such a way that ingested data is replicated to the bob iRODS server as well.
+
+## Environment
+
+Alice:
+
+```
+.
+└── gridftp001
+    ├── dataset1
+    │   └── single_file.txt
+    └── dataset2
+        ├── 1.txt
+        ├── 2.txt
+        └── objects
+            └── 3.txt
+```
