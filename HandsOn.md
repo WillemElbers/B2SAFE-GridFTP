@@ -65,6 +65,10 @@ grid-proxy-init
 
 Finally you have to supply the password for the user certificate and then the proxy certificate is generated. The final output will tell you when the proxy certificate will expire. By default the proxy certificate has a validity of 12 hours.
 
+#### Useful proxy and certificate commands
+
+##### grid-proxy-info
+
 You can use the `grid-proxy-info` command to get information about the current proxy:
 
 ```
@@ -77,6 +81,15 @@ strength : 1024 bits
 path     : /tmp/x509up_u1001
 timeleft : 8:22:56
 ```
+
+##### grid-proxy-destroy
+You can use the `grid-proxy-destroy` command to delete the current proxy certificate.
+
+##### grid-cert-info
+You can use the `grid-cert-info` command to display information about the current active user certificate (installed in `~/.globus/usercert.pem`).
+
+##### grid-cert-diagnostics
+You can use the `grid-cert-diagnostics` command to run some diagnostics on the certificate setup on your system and the trust chain.
 
 #### Additional information
 
