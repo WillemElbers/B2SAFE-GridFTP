@@ -152,33 +152,52 @@ Place the user certificate and key in the users (alice in our case) home directo
 ### Setup grid map file
 
 
-switch to user alice
+Switch to user alice and inspect the certificate to obtain the DN:
+
+```
 alice@iRODS4:~# grid-cert-info -subject
 /O=Grid/OU=GlobusTest/OU=simpleCA-irods4.alice/OU=local/CN=GridFTP-001
+```
 
+Add the mapping to the gridmap file:
+
+```
 grid-mapfile-add-entry \
      -dn "/O=Grid/OU=GlobusTest/OU=simpleCA-irods4.alice/OU=local/CN=GridFTP-001" \
      -ln alice
+```
 
+Output:
+
+```
 Modifying /etc/grid-security/grid-mapfile ...
 New entry:
 "/O=Grid/OU=GlobusTest/OU=simpleCA-irods4.alice/OU=local/CN=GridFTP-001" alice
 (1) entry added
-
+```
 
 
 #### References
-
-
-### Firewall configuration
 [todo]
 
-### Test
+### Firewall configuration
 
-Test setup
+Typically the following ports are used and should be configured in your firewall:
+
+| Port        | Usage                    |
+| ----------- | ------------------------ |
+| 2881        | GridFTP control port     |
+| 50000-51000 | Data transfer port range |
+
+### Testing the setup
+
+The following commands can be used to test the installion:
+
+```
 grid-proxy-init -verify -debug
-globus-url-copy file:/home/alice/test.txt gsiftp://iRODS4.alice/tmp/test.txt
 globus-url-copy -list gsiftp://iRODS4.alice/tmp/
+globus-url-copy file:/home/alice/test.txt gsiftp://iRODS4.alice/tmp/test.txt
+```
 
 ## B2SAFE DSI
 
@@ -269,4 +288,4 @@ export LD_PRELOAD
 1. http://www.irods.org
 2. http://toolkit.globus.org/toolkit/docs/6.0/admin/install
 3. https://github.com/EUDAT-B2STAGE/B2STAGE-GridFTP
-4. http://toolkit.globus.org/toolkit/docs/6.0/simpleca/admin
+4. http://toolkit.globus.org/toolkit/docs/6.0/simpleca/adminglobus

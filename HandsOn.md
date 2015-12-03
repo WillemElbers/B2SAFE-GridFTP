@@ -306,9 +306,23 @@ The goal is to improve the data transfer workflow as follows:
 * Configure the iRODS rule enginge in such a way that checksums are generated for the ingested data.
 * Configure the iRODS rule engine in such a way that PIDs are generated and assigned to ingested data.
 
+You can find the iRODS server rule engine configuration here: `/etc/irods/core.re`. 
+
+Some usefull hooks in this context are:
+
+* `acPostProcForPut` - Rule for post processing the put operation.
+* `acPostProcForCopy` - Rule for post processing the copy operation.
+* `acPostProcForFilePathReg` - Rule for post processing the registration
+* `acPostProcForCreate` - Rule for post processing of data object create.
+* `acPostProcForOpen` - Rule for post processing of data object open.
+* `acPostProcForPhymv` - Rule for post processing of data object phymv.
+* `acPostProcForRepl` - Rule for post processing of data object repl.
+
 Things to think about:
 
 * Upon ingestion of data in B2SAFE PIDs are assigned, how could you obtain the PIDs for data you ingest with the data transfer script?
+
+OPTIONALLY use icommands instead of server policies.
 
 ### 3.2 Server policies
 
