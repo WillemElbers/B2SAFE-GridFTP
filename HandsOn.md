@@ -5,6 +5,8 @@ This hands on session will make you familiar with the high performant GridFTP tr
 Total time for this hands on is estimated at 60 minutes.
 ## 1: GridFTP client setup and configuration
 
+Goal: install and configure the globus-url-copy command
+
 Time: 10 minutes
 
 ### 1.1: Globus client tools installation
@@ -144,10 +146,14 @@ echo "irods4.bob" >> /etc/hosts
 
 ## 2: Communicate with GridFTP server
 
+Goal: Getting familiar with the globus-url-copy command and performing some basic GridFTP actions.
+
 Time: 10 minutes
 
 ### 2.1: Globus-url-copy
 
+There are many options available for the `globus-url-copy` command. This section will show the parts explaining how to use the command and some of the most relevant options for this session.
+ 
 Usage of the `globus-url-copy` command:
 
 ```
@@ -188,6 +194,10 @@ Some useful arguments:
 ```
 
 ```
+  -list <url to list>
+```
+
+```
   -concurrency | -cc
       Number of concurrent ftp connections to use for multiple transfers.
 ```
@@ -212,10 +222,6 @@ Some useful arguments:
 
 Listing an iRODS collection in the remote server by using the `-list` argument.
 
-```
-  -list <url to list>
-```
-
 Example:
 
 ```
@@ -223,9 +229,14 @@ globus-url-copy -list gsiftp://irods4.alice/aliceZone/home/alice/
 ```
 Note: don't forget the trailing slash (/).
 
-The url to list consists of `/<zone_name>/<collection>/<collection>/...`.
+Since this GridFTP server is integrated with iRODS, the url to list consists of `/<zone_name>/<collection>/<collection>/...`. Where the `collection` part is the logical path inside the iRODS zone.
 
 If you want more output on what is happening use the `-dbg -v` arguments.
+
+```
+globus-url-copy -dbg -v -list gsiftp://irods4.alice/aliceZone/home/alice/
+```
+This will output alot of information on the data sent to and received from the server.
 
 ### 2.2: Uploading and Downloading files
 
@@ -258,27 +269,82 @@ Questions:
 
 ## 3 Data synchronization
 
+Goal: use the `globus-url-copy` command to implement a data transfer workflow using the B2SAFE service as remote storage.
+
 Time: 30 minutes
 
 ### 3.1 Client data transfer script
 
-Our goal is to develop a script that will synchronize a directory tree from the client to the server and when run multiple times it should take into account changed and delete files. You should also consider expiration for the proxy certificate and renew it when needed.
+The goal is to develop a script that will synchronize a directory tree from the client to the server and when run multiple times it should take into account changed and deleted files. 
 
-### 3.2 Improved client data transfer script
+* Create the data synchronization script
+* Synchronize your `gridftp<xyz>` directory to `/aliceZone/home/alice/gridftp<xyz>/data/`
+* Verify the data is properly updated
+* Synchronize again and verify no files are transfered
+* Change a file
+* Synchronize again and verify the file is properly updated
 
-Upon ingestion of data in B2SAFE PIDs are assigned, how could you obtain the PIDs for data you ingest with the data transfer script?
+### 3.2 Improved data transfer workflow
+
+The iRODS and B2SAGE hands on session should be completed before this step.
+
+The goal is to improve the data transfer workflow as follows:
+
+* Configure the iRODS rule enginge in such a way that checksums are generated for the ingested data.
+* Configure the iRODS rule engine in such a way that PIDs are generated and assigned to ingested data.
+
+Things to think about:
+
+* Upon ingestion of data in B2SAFE PIDs are assigned, how could you obtain the PIDs for data you ingest with the data transfer script?
 
 ### 3.2 Server policies
 
-Configure the alice iRODS server in such a way that ingested data is replicated to the bob iRODS server as well.
+The iRODS and B2SAGE hands on session should be completed before this step.
+
+The goal if to configure the alice iRODS server in such a way that ingested data is replicated to the bob iRODS server as well using the B2SAFE service.
 
 ## Environment
 
-Alice:
+"remote" AliceZone:
+
+```
+/aliceZone/home/alice:
+  C- /aliceZone/home/alice/gridftp001
+  C- /aliceZone/home/alice/gridftp002
+  C- /aliceZone/home/alice/gridftp003
+  C- /aliceZone/home/alice/gridftp004
+  C- /aliceZone/home/alice/gridftp005
+  C- /aliceZone/home/alice/gridftp006
+  C- /aliceZone/home/alice/gridftp007
+  C- /aliceZone/home/alice/gridftp008
+  C- /aliceZone/home/alice/gridftp009
+  C- /aliceZone/home/alice/gridftp010
+```
+
+local:
 
 ```
 .
 └── gridftp001
+    ├── dataset1
+    │   └── single_file.txt
+    └── dataset2
+        ├── 1.txt
+        ├── 2.txt
+        └── objects
+            └── 3.txt
+.
+└── gridftp002
+    ├── dataset1
+    │   └── single_file.txt
+    └── dataset2
+        ├── 1.txt
+        ├── 2.txt
+        └── objects
+            └── 3.txt
+...
+.
+└── gridftp010
     ├── dataset1
     │   └── single_file.txt
     └── dataset2
