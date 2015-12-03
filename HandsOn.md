@@ -225,7 +225,7 @@ Listing an iRODS collection in the remote server by using the `-list` argument.
 Example:
 
 ```
-globus-url-copy -list gsiftp://irods4.alice/aliceZone/home/alice/
+globus-url-copy -ipv6 -list gsiftp://irods4.alice/aliceZone/home/alice/
 ```
 Note: don't forget the trailing slash (/).
 
@@ -234,7 +234,7 @@ Since this GridFTP server is integrated with iRODS, the url to list consists of 
 If you want more output on what is happening use the `-dbg -v` arguments.
 
 ```
-globus-url-copy -dbg -v -list gsiftp://irods4.alice/aliceZone/home/alice/
+globus-url-copy -ipv6 -dbg -v -list gsiftp://irods4.alice/aliceZone/home/alice/
 ```
 This will output alot of information on the data sent to and received from the server.
 
@@ -245,7 +245,7 @@ This will output alot of information on the data sent to and received from the s
 Transfer a single file to the remote iRODS server:
 
 ```
-globus-url-copy -vb single_file.txt gsiftp://irods4.alice/aliceZone/home/alice/
+globus-url-copy -ipv6 -vb single_file.txt gsiftp://irods4.alice/aliceZone/home/alice/
 ```
 
 #### Directories
@@ -253,7 +253,7 @@ globus-url-copy -vb single_file.txt gsiftp://irods4.alice/aliceZone/home/alice/
 Tranfer a directory to the remote iRODS server:
 
 ```
-globus-url-copy -vb dataset1/ gsiftp://irods4.alice/aliceZone/home/alice/dataset1/
+globus-url-copy -ipv6 -vb dataset1/ gsiftp://irods4.alice/aliceZone/home/alice/dataset1/
 ```
 
 This command will fail with the following message because the destination directory doesn't exist:
@@ -304,6 +304,48 @@ The iRODS and B2SAGE hands on session should be completed before this step.
 The goal if to configure the alice iRODS server in such a way that ingested data is replicated to the bob iRODS server as well using the B2SAFE service.
 
 ## Environment
+
+User certificates:
+
+```
+alice@iRODS4:~/users$ tree
+.
+├── ca
+│   ├── dd5d9bb8.0
+│   └── dd5d9bb8.signing_policy
+├── gridftp001
+│   ├── usercert.pem
+│   └── userkey.pem
+├── gridftp002
+│   ├── usercert.pem
+│   └── userkey.pem
+├── gridftp003
+│   ├── usercert.pem
+│   └── userkey.pem
+├── gridftp004
+│   ├── usercert.pem
+│   └── userkey.pem
+├── gridftp005
+│   ├── usercert.pem
+│   └── userkey.pem
+├── gridftp006
+│   ├── usercert.pem
+│   └── userkey.pem
+├── gridftp007
+│   ├── usercert.pem
+│   └── userkey.pem
+├── gridftp008
+│   ├── usercert.pem
+│   └── userkey.pem
+├── gridftp009
+│   ├── usercert.pem
+│   └── userkey.pem
+└── gridftp010
+    ├── usercert.pem
+    └── userkey.pem
+```
+
+Each certificate is names `gridftp<xyz>.pem` with a passphrase of the form `gridftp<xyz>`, where `<xyz>` is the respective group number.
 
 "remote" AliceZone:
 
