@@ -33,20 +33,23 @@ dpkg -i globus-toolkit-repo_latest_all.deb && \
 apt-get update && apt-get install -y globus-data-management-client
 ```
  
-### 1.2: User certificate and proxy configuration
+### 1.2.1: User certificate, proxy and host configuration (local installation)
+
+Continue with this section if you want to install the globus-client-tools on your local machine. This allows you to ingest data into the B2SAFE test environment directly from your machine.
 
 * Obtain your user certificate and private key from the remote server `alice` and place it in `~/.globus/`:
 
 ```
 mkdir ~/.globus && \
-scp alice@145.100.59.149:~/users/gridftp<xyz>/user* ~/.globus/
+scp <user>@145.100.58.133:~/user* ~/.globus/
 ```
+Where `user` is your groups user (irods1, irods2, ...) of the client vm.
 
 * Install the certificate for the CA that signed the user certificate (only needed for untrusted CA's):
 
 ```
 mkdir /etc/grid-security/certificates && \
-scp alice@145.100.59.149:~/users/ca/dd5d9bb8* /etc/grid-security/certificates/
+scp <user>@145.100.58.133:~/ca/* /etc/grid-security/certificates/
 ```
 
 * Initialize the proxy
@@ -65,9 +68,49 @@ grid-proxy-init
 
 Finally you have to supply the password for the user certificate and then the proxy certificate is generated. The final output will tell you when the proxy certificate will expire. By default the proxy certificate has a validity of 12 hours.
 
-#### Useful proxy and certificate commands
+#### Host file configuration
 
-##### grid-proxy-info
+In order to access the irods machine via its hostnames `irods4.alice` we have to add the following entry to the `/etc/hosts` file:
+
+```
+echo "145.100.59.149 irods4.alice" >> /etc/hosts
+```
+Note: you might need to use `sudo` to obtain write permission.
+
+Continue with section 1.3.
+
+### 1.2.2: User certificate and proxy configuration (client vm)
+
+Continue with this section if you do not want to or cannot install the globus-client-tools on your local machine. This allows you to ingest data into the B2SAFE test environment from the client VM. If you want to ingest local data you will have to copy (scp) it to the client VM first. Credentials of the client VM are distributed during the workshop.
+
+* Install your user certificate and private key in `~/.globus/`:
+
+```
+mkdir ~/.globus && \
+cp *.pem ~/.globus/
+```
+
+* Initialize the proxy
+
+The first time you can run the following command to get detailed information about your certificate:
+
+```
+grid-proxy-init -verify -debug
+```
+
+Normally you don't need to initialize the proxy with the `-verify` and `-debug` options. Thus the following suffices to initialize a new proxy certificate:
+
+```
+grid-proxy-init
+```
+
+Finally you have to supply the password for the user certificate and then the proxy certificate is generated. The final output will tell you when the proxy certificate will expire. By default the proxy certificate has a validity of 12 hours.
+
+Continue with section 1.3.
+
+### 1.3 Useful proxy and certificate commands
+
+#### grid-proxy-info
 
 You can use the `grid-proxy-info` command to get information about the current proxy:
 
@@ -82,16 +125,16 @@ path     : /tmp/x509up_u1001
 timeleft : 8:22:56
 ```
 
-##### grid-proxy-destroy
+#### grid-proxy-destroy
 You can use the `grid-proxy-destroy` command to delete the current proxy certificate.
 
-##### grid-cert-info
+#### grid-cert-info
 You can use the `grid-cert-info` command to display information about the current active user certificate (installed in `~/.globus/usercert.pem`).
 
-##### grid-cert-diagnostics
+#### grid-cert-diagnostics
 You can use the `grid-cert-diagnostics` command to run some diagnostics on the certificate setup on your system and the trust chain.
 
-#### Additional information
+### 1.4 Additional information
 
 The `grid-proxy-init -verify -debug` command will show some information about your user certificate and CA that signed the user certificate.
 
@@ -120,9 +163,9 @@ The identity you will be using, based on the user certificate:
 Your identity: /O=Grid/OU=GlobusTest/OU=simpleCA-irods4.alice/OU=local/CN=GridFTP-001
 ```
 
-#### Issues
+### 1.5 Issues
 
-##### Issue 1
+#### Issue 1
 ```
 Error: Couldn't verify the authenticity of the user's credential to generate a proxy from.
        grid_proxy_init.c:956: globus_credential: Error verifying credential: Failed to verify credential
@@ -136,7 +179,7 @@ globus_sysconfig: File does not exist: /etc/grid-security/certificates/dd5d9bb8.
 
 This error means the CA signing policy file for the user certificate is not in the expected location. Fetch the CA signing policy file from the remote `alice` server an place it in `/etc/grid-security/certificates`.
 
-##### Issue 2
+#### Issue 2
 
 ```
 Error: Couldn't verify the authenticity of the user's credential to generate a proxy from.
@@ -146,16 +189,6 @@ globus_gsi_callback_module: Can't get the local trusted CA certificate: Cannot f
 ```
 
 This error means the CA certificate is not in the expected location. Fetch the CA certificate from the remote `alice` server and place it in `/etc/grid-security/certificates`.
-
-### 1.3 Host file configuration
-
-In order to access the alica and bob machines via there hostnames `irods4.alice` and `irods4.bob` we have to add the following entries to the `/etc/hosts` file:
-
-```
-echo "145.100.59.149 irods4.alice" >> /etc/hosts && \
-echo "irods4.bob" >> /etc/hosts
-```
-
 
 ## 2: Communicate with GridFTP server
 
