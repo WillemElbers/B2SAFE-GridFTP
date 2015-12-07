@@ -354,7 +354,7 @@ The goal is to improve the data transfer workflow as follows:
 
 #### 3.2.1 Using the icommands
 
-You can use the `irchecksum` command to generate checksums for data objects in iRODS. Alternativly you can utilize the `irule` command and invoke a rule which uses the `<todo>` microservice.
+You can use the `ichksum` command to generate checksums for data objects in iRODS. Alternativly you can utilize the `irule` command and invoke a rule which uses the `<todo>` microservice.
 
 In order the mint pids you can use the `irule` command to call the B2SAFE microservices used to manage PIDs.
 
