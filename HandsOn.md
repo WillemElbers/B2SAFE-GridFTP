@@ -37,7 +37,7 @@ apt-get update && apt-get install -y globus-data-management-client
 
 Continue with this section if you want to install the globus-client-tools on your local machine. This allows you to ingest data into the B2SAFE test environment directly from your machine.
 
-* Obtain your user certificate and private key from the remote server `alice` and place it in `~/.globus/`:
+* Obtain your user certificate and private key from the remote server and place it in `~/.globus/`:
 
 ```
 mkdir ~/.globus && \
@@ -146,7 +146,7 @@ You can use the `grid-cert-diagnostics` command to run some diagnostics on the c
 
 The `grid-proxy-init -verify -debug` command will show some information about your user certificate and CA that signed the user certificate.
 
-This is the user certificate and key file you just copied from the remote `alice` machine:
+This is the user certificate and key file you just copied from the remote machine:
 
 ```
 User Cert File: /root/.globus/usercert.pem
@@ -196,7 +196,7 @@ globus_gsi_callback_module: Could not verify credential
 globus_gsi_callback_module: Can't get the local trusted CA certificate: Cannot find trusted CA certificate with hash dd5d9bb8 in /etc/grid-security/certificates
 ```
 
-This error means the CA certificate is not in the expected location. Fetch the CA certificate from the remote `alice` server and place it in `/etc/grid-security/certificates`.
+This error means the CA certificate is not in the expected location. Fetch the CA certificate from the remote server and place it in `/etc/grid-security/certificates`.
 
 ## 2: Communicate with GridFTP server
 
