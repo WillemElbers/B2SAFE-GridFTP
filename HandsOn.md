@@ -358,6 +358,14 @@ You can use the `irchecksum` command to generate checksums for data objects in i
 
 In order the mint pids you can use the `irule` command to call the B2SAFE microservices used to manage PIDs.
 
+Usefull rules can be found in `/etc/irods/eudat3.re`.
+
+A selection (not a complete list) of PID management rules provided via B2SAFE:
+
+* EUDATCreatePID(*parent_pid, *path, *ror, *iCATCache, *newPID)
+* EUDATPidsForColl(*collPath)
+* EUDATeCHECKSUMupdate(*PID, *path)
+
 #### 3.2.2 Using the iRODS server rule engine
 
 A better, and more advanced, approach is to use the iRODS rule engine to compute checksums and mint PIDs automatically. This has probably not been covered in the tutorials so far, so only proceed if you are ok with some trial and error.
