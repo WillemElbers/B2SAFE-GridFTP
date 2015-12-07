@@ -9,7 +9,7 @@ Goal: install and configure the globus-url-copy command
 
 Time: 10 minutes
 
-### 1.1: Globus client tools installation
+### 1.1: Globus client tools installation (local installation)
 
 Install the `globus-data-management-client` from the globus package repo on your system. This will provide the Client Tools for data management, including the GridFTP client programs and globus-url-copy
 
@@ -33,7 +33,7 @@ dpkg -i globus-toolkit-repo_latest_all.deb && \
 apt-get update && apt-get install -y globus-data-management-client
 ```
  
-### 1.2.1: User certificate, proxy and host configuration (local installation)
+### 1.1.2: User certificate, proxy and host configuration 
 
 Continue with this section if you want to install the globus-client-tools on your local machine. This allows you to ingest data into the B2SAFE test environment directly from your machine.
 
@@ -68,7 +68,7 @@ grid-proxy-init
 
 Finally you have to supply the password for the user certificate and then the proxy certificate is generated. The final output will tell you when the proxy certificate will expire. By default the proxy certificate has a validity of 12 hours.
 
-#### Host file configuration
+### 1.1.3 Host file configuration
 
 In order to access the irods machine via its hostnames `irods4.alice` we have to add the following entry to the `/etc/hosts` file:
 
@@ -77,9 +77,16 @@ echo "145.100.59.149 irods4.alice" >> /etc/hosts
 ```
 Note: you might need to use `sudo` to obtain write permission.
 
+### 1.1.4 Dataset
+
+On the client VM a simple file structure has been prepared for this tutorial. You can use your own files, but in order to follow the tutorial it might be easier to copy these files to your local machine:
+
+```
+```
+
 Continue with section 1.3.
 
-### 1.2.2: User certificate and proxy configuration (client vm)
+### 1.2: User certificate and proxy configuration (client vm)
 
 Continue with this section if you do not want to or cannot install the globus-client-tools on your local machine. This allows you to ingest data into the B2SAFE test environment from the client VM. If you want to ingest local data you will have to copy (scp) it to the client VM first. Credentials of the client VM are distributed during the workshop.
 
@@ -264,6 +271,9 @@ Some useful arguments:
        or the sizes do not match.  The default sync level is 2.
 ```
 
+In the following command examples `irods<x>` is the irods username of your group. `<x>` should be replaced with your group number.
+
+
 ### 2.1: Listing
 
 Listing an iRODS collection in the remote server by using the `-list` argument.
@@ -271,8 +281,9 @@ Listing an iRODS collection in the remote server by using the `-list` argument.
 Example:
 
 ```
-globus-url-copy -ipv6 -list gsiftp://irods4.alice/aliceZone/home/alice/
+globus-url-copy -ipv6 -list gsiftp://irods4.alice/aliceZone/home/irods<x>/
 ```
+
 Note: don't forget the trailing slash (/).
 
 Since this GridFTP server is integrated with iRODS, the url to list consists of `/<zone_name>/<collection>/<collection>/...`. Where the `collection` part is the logical path inside the iRODS zone.
@@ -280,8 +291,9 @@ Since this GridFTP server is integrated with iRODS, the url to list consists of 
 If you want more output on what is happening use the `-dbg -v` arguments.
 
 ```
-globus-url-copy -ipv6 -dbg -v -list gsiftp://irods4.alice/aliceZone/home/alice/
+globus-url-copy -ipv6 -dbg -v -list gsiftp://irods4.alice/aliceZone/home/irods<x>/
 ```
+
 This will output alot of information on the data sent to and received from the server.
 
 ### 2.2: Uploading and Downloading files
@@ -291,7 +303,7 @@ This will output alot of information on the data sent to and received from the s
 Transfer a single file to the remote iRODS server:
 
 ```
-globus-url-copy -ipv6 -vb single_file.txt gsiftp://irods4.alice/aliceZone/home/alice/
+globus-url-copy -ipv6 -vb single_file.txt gsiftp://irods4.alice/aliceZone/home/irods<x>/
 ```
 
 #### Directories
@@ -299,7 +311,7 @@ globus-url-copy -ipv6 -vb single_file.txt gsiftp://irods4.alice/aliceZone/home/a
 Tranfer a directory to the remote iRODS server:
 
 ```
-globus-url-copy -ipv6 -vb dataset1/ gsiftp://irods4.alice/aliceZone/home/alice/dataset1/
+globus-url-copy -ipv6 -vb dataset1/ gsiftp://irods4.alice/aliceZone/home/irods<x>/dataset1/
 ```
 
 This command will fail with the following message because the destination directory doesn't exist:
@@ -324,7 +336,7 @@ Time: 30 minutes
 The goal is to develop a script that will synchronize a directory tree from the client to the server and when run multiple times it should take into account changed and deleted files. 
 
 * Create the data synchronization script
-* Synchronize your `gridftp<xyz>` directory to `/aliceZone/home/alice/gridftp<xyz>/data/`
+* Synchronize your `gridftp<xyz>` directory to `/aliceZone/home/alice/irods<x>/data/`
 * Verify the data is properly updated
 * Synchronize again and verify no files are transfered
 * Change a file
@@ -336,8 +348,18 @@ The iRODS and B2SAGE hands on session should be completed before this step.
 
 The goal is to improve the data transfer workflow as follows:
 
-* Configure the iRODS rule enginge in such a way that checksums are generated for the ingested data.
-* Configure the iRODS rule engine in such a way that PIDs are generated and assigned to ingested data.
+* Configure the data transfer workflow in such a way that checksums are generated for the ingested data.
+* Configure the data transfer workflow in such a way that PIDs are generated and assigned to ingested data.
+
+#### 3.2.1 Using the icommands
+
+You can use the `irchecksum` command to generate checksums for data objects in iRODS. Alternativly you can utilize the `irule` command and invoke a rule which uses the `<todo>` microservice.
+
+In order the mint pids you can use the `irule` command to call the B2SAFE microservices used to manage PIDs.
+
+#### 3.2.2 Using the iRODS server rule engine
+
+A better, and more advanced, approach is to use the iRODS rule engine to compute checksums and mint PIDs automatically. This has probably not been covered in the tutorials so far, so only proceed if you are ok with some trial and error.
 
 You can find the iRODS server rule engine configuration here: `/etc/irods/core.re`. 
 
@@ -351,19 +373,36 @@ Some usefull hooks in this context are:
 * `acPostProcForPhymv` - Rule for post processing of data object phymv.
 * `acPostProcForRepl` - Rule for post processing of data object repl.
 
-Things to think about:
+Make sure to limit the changes to the irods home directory for your user:
 
-* Upon ingestion of data in B2SAFE PIDs are assigned, how could you obtain the PIDs for data you ingest with the data transfer script?
+```
+ON($objPath like "/aliceZone/home/irods<x>/*") {
+	# do something useful
+}
+```
 
-OPTIONALLY use icommands instead of server policies.
+More information on the iRODS microservices: https://docs.irods.org/master/doxygen/
 
-### 3.2 Server policies
+#### 3.2.3 Things to think about
 
-The iRODS and B2SAGE hands on session should be completed before this step.
+* Upon ingestion of data in B2SAFE checksums are now computed, how could you obtain the checksums for data you ingest with the data transfer script?
+* Upon ingestion of data in B2SAFE PIDs are now assigned, how could you obtain the PIDs for data you ingest with the data transfer script?
+
+### 3.3 Server policies
+
+If you completed the data transfer workflow improvements by using the iRODS rule engine you can continue with this section.
+
+The iRODS and B2STAGE hands on sessions should be completed before this step.
 
 The goal if to configure the alice iRODS server in such a way that ingested data is replicated to the bob iRODS server as well using the B2SAFE service.
 
-## Environment
+## Appendix A: Environment
+
+Client VM:
+
+```
+/home/irods1/
+```
 
 User certificates:
 
