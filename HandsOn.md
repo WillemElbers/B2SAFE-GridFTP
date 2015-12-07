@@ -82,6 +82,7 @@ Note: you might need to use `sudo` to obtain write permission.
 On the client VM a simple file structure has been prepared for this tutorial. You can use your own files, but in order to follow the tutorial it might be easier to copy these files to your local machine:
 
 ```
+scp -r <user>@145.100.58.133:~/gridftp* .
 ```
 
 Continue with section 1.3.
@@ -400,51 +401,29 @@ The goal if to configure the alice iRODS server in such a way that ingested data
 
 Client VM:
 
-```
-/home/irods1/
-```
-
-User certificates:
+for each iRODS user the following layout is present:
 
 ```
-alice@iRODS4:~/users$ tree
+/home/irods<x># tree
 .
 ├── ca
 │   ├── dd5d9bb8.0
 │   └── dd5d9bb8.signing_policy
 ├── gridftp001
-│   ├── usercert.pem
-│   └── userkey.pem
-├── gridftp002
-│   ├── usercert.pem
-│   └── userkey.pem
-├── gridftp003
-│   ├── usercert.pem
-│   └── userkey.pem
-├── gridftp004
-│   ├── usercert.pem
-│   └── userkey.pem
-├── gridftp005
-│   ├── usercert.pem
-│   └── userkey.pem
-├── gridftp006
-│   ├── usercert.pem
-│   └── userkey.pem
-├── gridftp007
-│   ├── usercert.pem
-│   └── userkey.pem
-├── gridftp008
-│   ├── usercert.pem
-│   └── userkey.pem
-├── gridftp009
-│   ├── usercert.pem
-│   └── userkey.pem
-└── gridftp010
-    ├── usercert.pem
-    └── userkey.pem
+│   ├── dataset1
+│   │   └── single_file.txt
+│   └── dataset2
+│       ├── 1.txt
+│       ├── 2.txt
+│       └── objects
+│           └── 3.txt
+├── usercert.pem
+└── userkey.pem
+
+5 directories, 8 files
 ```
 
-Each certificate is names `gridftp<xyz>.pem` with a passphrase of the form `gridftp<xyz>`, where `<xyz>` is the respective group number.
+Each certificate is named `usercert.pem` with a passphrase of the form `gridftp<xyz>`, where `<xyz>` is the respective group number.
 
 "remote" AliceZone:
 
@@ -460,37 +439,4 @@ Each certificate is names `gridftp<xyz>.pem` with a passphrase of the form `grid
   C- /aliceZone/home/alice/gridftp008
   C- /aliceZone/home/alice/gridftp009
   C- /aliceZone/home/alice/gridftp010
-```
-
-local:
-
-```
-.
-└── gridftp001
-    ├── dataset1
-    │   └── single_file.txt
-    └── dataset2
-        ├── 1.txt
-        ├── 2.txt
-        └── objects
-            └── 3.txt
-.
-└── gridftp002
-    ├── dataset1
-    │   └── single_file.txt
-    └── dataset2
-        ├── 1.txt
-        ├── 2.txt
-        └── objects
-            └── 3.txt
-...
-.
-└── gridftp010
-    ├── dataset1
-    │   └── single_file.txt
-    └── dataset2
-        ├── 1.txt
-        ├── 2.txt
-        └── objects
-            └── 3.txt
 ```
